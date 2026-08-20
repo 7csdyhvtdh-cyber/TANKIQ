@@ -245,13 +245,13 @@
     <div class="app">
       <header>
         <div>
-            <img
-              class="brand-icon"
-              src="/assets/tankiq-icon.svg"
-              width="38"
-              height="38"
-              alt=""
-            /><span
+          <img
+            class="brand-icon"
+            src="/assets/tankiq-icon.svg"
+            width="38"
+            height="38"
+            alt=""
+          /><span
             ><b>TANKIQ</b
             ><small style="display: block; color: #6d7774; font-size: 10px"
               >Version 1.3.0</small
@@ -270,11 +270,11 @@
       </header>
       <main>
         <section id="now" class="view on">
-          <h1>Deine Empfehlung</h1>
-          <p class="muted">
+          <h1 id="nowTitle">Deine Empfehlung</h1>
+          <p id="nowIntro" class="muted">
             TANKIQ zeigt dir, ob sich Tanken jetzt lohnt – und warum.
           </p>
-          <div class="seg">
+          <div id="fuelSelector" class="seg">
             <button data-fuel="e5" class="on">E5</button
             ><button data-fuel="e10" hidden>E10</button
             ><button data-fuel="diesel" hidden>Diesel</button>
@@ -313,8 +313,8 @@
           </div>
         </section>
         <section id="options" class="view">
-          <h1>Tankstellen in der Nähe</h1>
-          <p class="muted">
+          <h1 id="optionsTitle">Tankstellen in der Nähe</h1>
+          <p id="optionsIntro" class="muted">
             Vergleiche geöffnete Tankstellen mit Livepreisen an deinem aktuellen
             Standort.
           </p>
@@ -325,8 +325,8 @@
         </section>
         <section id="route" class="view">
           <div class="muted">Null-Umweg-Prinzip</div>
-          <h1>Tankstopp auf der Route</h1>
-          <p class="muted">
+          <h1 id="routeTitle">Tankstopp auf der Route</h1>
+          <p id="routeIntro" class="muted">
             Finde die beste Tankstelle entlang deiner geplanten Strecke – mit
             möglichst wenig Umweg.
           </p>
@@ -380,36 +380,80 @@
         </section>
         <section id="profile" class="view">
           <h1>Mein TANKIQ</h1>
-          <p class="muted">
+          <p id="profileIntro" class="muted">
             Verwalte Fahrzeugdaten, Tankvorgänge und persönliche Einstellungen.
           </p>
           <div class="panel">
             <span class="badge">Fahrzeug & Regeln</span>
             <div class="grid" style="margin-top: 10px">
               <label
+                >Antriebsart<select id="vehicleFuel">
+                  <option value="petrol">Benzin</option>
+                  <option value="diesel">Diesel</option>
+                  <option value="electric">Elektro</option>
+                </select></label
+              ><label data-mode="fuel"
                 >Verbrauch l/100 km<input
                   id="cons"
                   type="number"
                   value="8"
                   step=".1"
                   min=".1" /></label
-              ><label
+              ><label data-mode="fuel"
                 >Tankgröße l<input
                   id="tankSize"
                   type="number"
                   value="67"
                   min="1" /></label
-              ><label
-                >Fahrzeugkraftstoff<select id="vehicleFuel">
-                  <option value="petrol">Benzin</option>
-                  <option value="diesel">Diesel</option>
-                </select></label
-              ><label
+              ><label data-mode="fuel"
                 >E10 vom Hersteller freigegeben?<select id="e10Compatible">
                   <option value="no">Nein / unbekannt</option>
                   <option value="yes">Ja</option>
                 </select></label
-              ><label
+              ><label data-mode="ev" hidden
+                >Batteriekapazität kWh<input
+                  id="batteryCapacityKwh"
+                  type="number"
+                  value="77"
+                  step=".1"
+                  min="5"
+                  max="250" /></label
+              ><label data-mode="ev" hidden
+                >Verbrauch kWh/100 km<input
+                  id="evCons"
+                  type="number"
+                  value="18"
+                  step=".1"
+                  min="5"
+                  max="80" /></label
+              ><label data-mode="ev" hidden
+                >Ziel-Ladestand %<input
+                  id="targetSoc"
+                  type="number"
+                  value="80"
+                  min="1"
+                  max="100" /></label
+              ><label data-mode="ev" hidden
+                >Max. DC-Ladeleistung kW<input
+                  id="vehicleDcKw"
+                  type="number"
+                  value="150"
+                  min="2"
+                  max="500" /></label
+              ><label data-mode="ev" hidden
+                >Ladeanschluss<select id="evConnector">
+                  <option value="ccs">CCS</option>
+                  <option value="type2">Typ 2</option>
+                  <option value="any">Alle passenden</option>
+                </select></label
+              ><label data-mode="ev" hidden
+                >Öffentlicher Ladetarif €/kWh<input
+                  id="publicTariff"
+                  type="text"
+                  inputmode="decimal"
+                  value="0,59"
+                  placeholder="z. B. 0,59" /></label
+              ><label data-mode="fuel"
                 >Mindestvorteil €<input
                   id="minSave"
                   type="number"
@@ -441,7 +485,7 @@
             </button>
             <div id="rangeInfo" class="result"></div>
           </div>
-          <div class="panel">
+          <div class="panel" data-mode="fuel">
             <span class="badge">Nach dem Tanken</span>
             <h2>Tankvorgang erfassen</h2>
             <p class="muted">
@@ -510,14 +554,84 @@
               Beispiel heute: 60 l getankt, nicht voll, 7 l fehlen.
             </div>
           </div>
+          <div class="panel" data-mode="ev" hidden>
+            <span class="badge">Nach dem Laden</span>
+            <h2>Ladevorgang erfassen</h2>
+            <p class="muted">
+              Nur nach einem Ladestopp eintragen. Geladene Energie und
+              Batteriestand danach werden getrennt geführt.
+            </p>
+            <div class="grid">
+              <label
+                >Geladen kWh<input
+                  id="chargeKwh"
+                  type="text"
+                  inputmode="decimal"
+                  placeholder="z. B. 32,5" /></label
+              ><label
+                >Bezahlter Preis €/kWh<input
+                  id="chargePrice"
+                  type="text"
+                  inputmode="decimal"
+                  placeholder="z. B. 0,59" /></label
+              ><label
+                >Ladestand danach %<input
+                  id="chargeSocAfter"
+                  type="number"
+                  value="80"
+                  min="0"
+                  max="100" /></label
+              ><label
+                >Ladedauer Minuten<input
+                  id="chargeDuration"
+                  type="number"
+                  min="0"
+                  max="1440"
+                  placeholder="z. B. 28" /></label
+              ><label
+                >Erkannter Ladepunkt<input
+                  id="chargeStation"
+                  readonly
+                  value="Noch nicht erkannt" /></label
+              ><label
+                >Kilometerstand (optional)<input
+                  id="chargeOdometer"
+                  type="number"
+                  min="0"
+                  placeholder="für Verbrauch"
+              /></label>
+            </div>
+            <div id="chargePriceInfo" class="hint">
+              Stationspreis übernehmen, sofern vorhanden – sonst gilt dein
+              persönlicher Ladetarif.
+            </div>
+            <button
+              id="useChargePrice"
+              type="button"
+              class="btn"
+              style="width: 100%; margin-top: 10px"
+            >
+              Tarif oder Stationspreis übernehmen
+            </button>
+            <button
+              id="saveCharge"
+              class="btn"
+              style="width: 100%; margin-top: 10px"
+            >
+              Ladevorgang speichern
+            </button>
+            <div id="chargeEventInfo" class="result">
+              Nach dem Laden Energie, Preis und Ladestand erfassen.
+            </div>
+          </div>
           <div class="panel">
             <span class="badge">Verlauf</span>
-            <h2>Letzte Tankvorgänge</h2>
+            <h2 id="historyTitle">Letzte Tankvorgänge</h2>
             <div id="history"></div>
           </div>
           <div class="panel">
             <b>Prinzip</b>
-            <p class="muted">
+            <p id="principleText" class="muted">
               TANKIQ meldet Handlungsbedarf nur, wenn Datenqualität, Reichweite
               und wirtschaftlicher Vorteil dafür ausreichen. Ein Teilvorgang
               liefert noch keinen belastbaren Verbrauch; dafür wartet TANKIQ auf
@@ -537,12 +651,20 @@
     <script type="module">
       import {
         allowedFuelTypes,
+        applyEvRangeConfirmation,
         applyRangeConfirmation,
+        buildChargingEvent,
         buildFuelingEvent,
+        deriveBatteryState,
         deriveTankState,
+        estimatedChargeMinutes,
+        evRangeEstimate,
+        fullToFullElectricConsumption,
         fullToFullConsumption,
+        isElectricProfile,
         nearestPricedStation,
         parseLocalizedNumber,
+        plannedChargeKwh,
         plannedRefillLiters,
         rangeEstimate,
         rangeFreshness,
@@ -555,6 +677,7 @@
         round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
       let fuel = "e5",
         feed = null,
+        chargerFeed = null,
         loc = null,
         map,
         layer,
@@ -572,9 +695,67 @@
             timeValue: 20,
             vehicleFuel: "petrol",
             e10Compatible: false,
+            batteryCapacityKwh: 77,
+            evCons: 18,
+            evSoc: 60,
+            targetSoc: 80,
+            vehicleDcKw: 150,
+            evConnector: "ccs",
+            publicTariff: 0.59,
           },
           JSON.parse(localStorage.getItem("tankiq_profile") || "{}"),
         );
+      }
+      function electric() {
+        return isElectricProfile(prof());
+      }
+      function setModeUi(mode = prof().vehicleFuel) {
+        const ev = mode === "electric";
+        $$('[data-mode="fuel"]').forEach((element) => (element.hidden = ev));
+        $$('[data-mode="ev"]').forEach((element) => (element.hidden = !ev));
+        $("#fuelSelector").hidden = ev;
+        $("#nowTitle").textContent = ev
+          ? "Deine Ladeempfehlung"
+          : "Deine Empfehlung";
+        $("#nowIntro").textContent = ev
+          ? "TANKIQ zeigt dir, ob und wo du jetzt sinnvoll laden solltest – und warum."
+          : "TANKIQ zeigt dir, ob sich Tanken jetzt lohnt – und warum.";
+        $("#optionsTitle").textContent = ev
+          ? "Ladepunkte in der Nähe"
+          : "Tankstellen in der Nähe";
+        $("#optionsIntro").textContent = ev
+          ? "Vergleiche passende Ladepunkte am aktuellen Standort nach Weg, Leistung, Tarif und Zeit."
+          : "Vergleiche geöffnete Tankstellen mit Livepreisen an deinem aktuellen Standort.";
+        $("#routeTitle").textContent = ev
+          ? "Ladestopp auf der Route"
+          : "Tankstopp auf der Route";
+        $("#routeIntro").textContent = ev
+          ? "Finde den sinnvollsten Ladepunkt entlang deiner Strecke – passend zu Reichweite, Anschluss und Ladeleistung."
+          : "Finde die beste Tankstelle entlang deiner geplanten Strecke – mit möglichst wenig Umweg.";
+        $("#profileIntro").textContent = ev
+          ? "Verwalte Elektrofahrzeug, Ladetarif, Ladevorgänge und persönliche Einstellungen."
+          : "Verwalte Fahrzeugdaten, Tankvorgänge und persönliche Einstellungen.";
+        const labels = ev
+          ? ["Ladeempfehlung", "Ladepunkte", "Ladestopp", "Mein TANKIQ"]
+          : ["Empfehlung", "Tankstellen", "Routenstopp", "Mein TANKIQ"];
+        $$("[data-view]").forEach(
+          (button, index) => (button.textContent = labels[index]),
+        );
+        $("#historyTitle").textContent = ev
+          ? "Letzte Ladevorgänge"
+          : "Letzte Tankvorgänge";
+        $("#principleText").textContent = ev
+          ? "TANKIQ berücksichtigt Reichweite, Ladetarif, Umweg, Ladeleistung und Zeit. Stationspreise werden nur verwendet, wenn sie maschinenlesbar vorliegen; sonst gilt dein persönlicher Tarif."
+          : "TANKIQ meldet Handlungsbedarf nur, wenn Datenqualität, Reichweite und wirtschaftlicher Vorteil dafür ausreichen. Ein Teilvorgang liefert noch keinen belastbaren Verbrauch; dafür wartet TANKIQ auf zwei Volltankungen.";
+        $("#refresh").setAttribute(
+          "aria-label",
+          ev
+            ? "Standort und Ladepunkte aktualisieren"
+            : "Standort und Preise aktualisieren",
+        );
+        $("#refresh").title = ev
+          ? "Standort und Ladepunkte aktualisieren"
+          : "Standort und Preise aktualisieren";
       }
       function syncFuelChoices() {
         const allowed = allowedFuelTypes(prof());
@@ -593,10 +774,24 @@
           return [];
         }
       }
+      function chargingHistory() {
+        try {
+          const h = JSON.parse(
+            localStorage.getItem("tankiq_charge_events") || "[]",
+          );
+          return Array.isArray(h) ? h : [];
+        } catch {
+          return [];
+        }
+      }
       function storedRangeConfirmation() {
         try {
           return JSON.parse(
-            localStorage.getItem("tankiq_range_confirmation") || "null",
+            localStorage.getItem(
+              electric()
+                ? "tankiq_ev_range_confirmation"
+                : "tankiq_range_confirmation",
+            ) || "null",
           );
         } catch {
           return null;
@@ -609,8 +804,18 @@
           storedRangeConfirmation(),
         );
       }
+      function battery() {
+        return applyEvRangeConfirmation(
+          prof(),
+          deriveBatteryState(prof(), chargingHistory()),
+          storedRangeConfirmation(),
+        );
+      }
+      function energyState() {
+        return electric() ? battery() : tank();
+      }
       function freshness() {
-        return rangeFreshness(tank(), loc, {
+        return rangeFreshness(energyState(), loc, {
           maxAgeHours: 24,
           moveThresholdKm: 5,
         });
@@ -622,7 +827,9 @@
             "Bitte die Restreichweite als Kilometerwert eingeben, z. B. 420.",
           );
         localStorage.setItem(
-          "tankiq_range_confirmation",
+          electric()
+            ? "tankiq_ev_range_confirmation"
+            : "tankiq_range_confirmation",
           JSON.stringify({
             rangeKm,
             timestamp: new Date().toISOString(),
@@ -642,7 +849,9 @@
         });
       }
       function planned() {
-        return plannedRefillLiters(prof(), tank());
+        return electric()
+          ? plannedChargeKwh(prof(), battery())
+          : plannedRefillLiters(prof(), tank());
       }
       function stations() {
         return feed
@@ -650,6 +859,12 @@
               (s) => s.isOpen && typeof s.prices?.[fuel] === "number",
             )
           : [];
+      }
+      function chargers() {
+        return (
+          chargerFeed?.chargers?.filter((charger) => charger.isOperational) ||
+          []
+        );
       }
       function suggestFuelingContext(force = false) {
         const station = nearestPricedStation(feed?.stations || [], fuel),
@@ -677,11 +892,41 @@
         } else
           info.textContent = `Manueller Preis bleibt erhalten. Verfügbarer Livepreis: ${livePrice.toFixed(3).replace(".", ",")} €/l von ${station.name}.`;
       }
+      function suggestChargingContext(force = false) {
+        const charger = [...chargers()].sort(
+            (a, b) => a.distanceKm - b.distanceKm,
+          )[0],
+          price = $("#chargePrice"),
+          stationField = $("#chargeStation"),
+          info = $("#chargePriceInfo"),
+          tariff = Number(prof().publicTariff) || 0.59;
+        if (!charger) {
+          stationField.value = "Noch nicht erkannt";
+          if (force || !price.value)
+            price.value = tariff.toFixed(2).replace(".", ",");
+          info.textContent =
+            "Kein Ladepunkt erkannt; dein persönlicher Ladetarif wurde eingesetzt.";
+          return;
+        }
+        const usedPrice = charger.pricePerKwh || tariff;
+        stationField.value = `${charger.name} · ${charger.distanceKm.toFixed(1).replace(".", ",")} km`;
+        if (force || !price.value || price.dataset.auto === "true") {
+          price.value = usedPrice.toFixed(2).replace(".", ",");
+          price.dataset.auto = "true";
+        }
+        info.textContent = charger.pricePerKwh
+          ? `Stationspreis ${usedPrice.toFixed(2).replace(".", ",")} €/kWh von ${charger.name} übernommen. Bitte in der Lade-App prüfen.`
+          : `Für ${charger.name} ist kein belastbarer Stationspreis verfügbar; verwendet wird dein Tarif von ${tariff.toFixed(2).replace(".", ",")} €/kWh.`;
+      }
       function rawRange() {
-        return rangeEstimate(prof(), tank()).raw;
+        return electric()
+          ? evRangeEstimate(prof(), battery()).raw
+          : rangeEstimate(prof(), tank()).raw;
       }
       function trust() {
-        return rangeEstimate(prof(), tank());
+        return electric()
+          ? evRangeEstimate(prof(), battery())
+          : rangeEstimate(prof(), tank());
       }
       function met(s) {
         const p = prof(),
@@ -708,7 +953,64 @@
           .map((s) => ({ s, m: met(s) }))
           .sort((a, b) => a.m.total - b.m.total)[0];
       }
+      function evMet(charger) {
+        const p = prof(),
+          energy = planned(),
+          tariff = Number(p.publicTariff) || 0.59,
+          price = charger.pricePerKwh || tariff,
+          nearest =
+            [...chargers()].sort((a, b) => a.distanceKm - b.distanceKm)[0] ||
+            charger,
+          extra = Math.max(0, (charger.distanceKm - nearest.distanceKm) * 2),
+          drive = round2(((extra * p.evCons) / 100) * tariff),
+          detourMinutes = extra,
+          chargeMinutes = estimatedChargeMinutes(
+            energy,
+            p.vehicleDcKw,
+            charger.maxPowerKw || 22,
+            p.targetSoc,
+          ),
+          time = round2(((detourMinutes + chargeMinutes) / 60) * p.timeValue),
+          charging = round2(energy * price),
+          total = round2(charging + drive + time);
+        return {
+          energy,
+          tariff,
+          price,
+          drive,
+          time,
+          charging,
+          total,
+          chargeMinutes,
+        };
+      }
+      function bestCharger() {
+        return chargers()
+          .map((charger) => ({ charger, metrics: evMet(charger) }))
+          .sort((a, b) => a.metrics.total - b.metrics.total)[0];
+      }
       function renderTank() {
+        if (electric()) {
+          const p = prof(),
+            s = battery(),
+            energy = planned(),
+            pct = Math.round((s.kwh / p.batteryCapacityKwh) * 100),
+            when = s.asOf
+              ? new Date(s.asOf).toLocaleString("de-DE", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })
+              : "bisherige Profileingabe",
+            note =
+              s.source === "dashboard-range"
+                ? `Aus der Restreichweite des Fahrzeugs bestätigt am ${when}.`
+                : s.source === "charging-event"
+                  ? `Stand direkt nach dem Ladevorgang am ${when}.`
+                  : `Aus dem hinterlegten Ladestand von ${Math.round(s.soc)} %.`;
+          $("#tankState").innerHTML =
+            `<span class="badge">Batterie & Planmenge</span><div class="summary" style="margin-top:9px"><div><strong>${s.kwh.toFixed(1).replace(".", ",")} kWh</strong><div class="muted">geschätzt verfügbar (${pct} %)</div></div><div style="text-align:right"><strong>${energy.toFixed(1).replace(".", ",")} kWh</strong><div class="muted">bis ${p.targetSoc} % geplant</div></div></div><div class="hint">${note}</div>`;
+          return;
+        }
         const p = prof(),
           s = tank(),
           l = planned(),
@@ -729,7 +1031,7 @@
           `<span class="badge">Tankstand & Planmenge</span><div class="summary" style="margin-top:9px"><div><strong>${s.liters.toFixed(1).replace(".", ",")} l</strong><div class="muted">geschätzt im Tank (${pct} %)</div></div><div style="text-align:right"><strong>${l.toFixed(1).replace(".", ",")} l</strong><div class="muted">bis voll geplant</div></div></div><div class="hint">${note}</div>`;
       }
       function renderRangeCard() {
-        const s = tank(),
+        const s = energyState(),
           f = freshness(),
           when = s.asOf
             ? new Date(s.asOf).toLocaleString("de-DE", {
@@ -742,7 +1044,9 @@
               ? "Bordcomputer"
               : s.source === "fueling-event"
                 ? "Tankvorgang"
-                : "bisheriges Profil";
+                : s.source === "charging-event"
+                  ? "Ladevorgang"
+                  : "bisheriges Profil";
         syncRangeInputs();
         $("#rangeCheckInfo").className = f.fresh ? "result live" : "result err";
         $("#rangeCheckInfo").textContent = f.fresh
@@ -753,10 +1057,83 @@
               ? `Letzte Bestätigung: ${when}. Bitte vor einer Tankentscheidung kurz den Bordcomputerwert übernehmen.`
               : "Noch keine aktuelle Restreichweite bestätigt.";
         $("#routeRangeInfo").textContent = f.fresh
-          ? `Vorbelegt mit ${Math.round((s.liters / prof().cons) * 100)} km; „Route prüfen“ bestätigt den angezeigten Wert erneut.`
+          ? `Vorbelegt mit ${Math.round(rawRange())} km; „Route prüfen“ bestätigt den angezeigten Wert erneut.`
           : "Bitte vor der Route den aktuellen Bordcomputerwert eingeben.";
       }
+      function renderElectric() {
+        const p = prof(),
+          t = trust(),
+          choice = bestCharger(),
+          energy = planned(),
+          f = freshness(),
+          state = battery();
+        renderTank();
+        renderRangeCard();
+        $("#trustTitle").textContent = !f.fresh
+          ? "Restreichweite nicht aktuell"
+          : t.level === "high"
+            ? "Gute Datengrundlage"
+            : "Ausreichende Datengrundlage";
+        $("#trustText").textContent = f.fresh
+          ? `Rechnerisch ${Math.round(t.raw)} km, konservativ planbar ${Math.round(t.usable)} km. Basis: ${state.kwh.toFixed(1).replace(".", ",")} kWh in der Batterie.`
+          : "Ladepunkte bleiben sichtbar. Reichweite, Energiemenge und Ladeempfehlung werden nach kurzer Bestätigung belastbar.";
+        let title = "Keine Ladeempfehlung möglich",
+          action = "DATEN FEHLEN",
+          reason = "Es wurden noch keine passenden Ladepunkte geladen.";
+        if (choice) {
+          if (!f.fresh) {
+            title = "Restreichweite aktualisieren";
+            action = "KURZ BESTÄTIGEN";
+            reason =
+              "Bitte den aktuellen Kilometerwert vom Bordcomputer übernehmen.";
+          } else if (t.usable < 40) {
+            title = "Jetzt laden";
+            action = "SICHERHEIT";
+            reason =
+              "Die konservative Reichweite ist niedrig. Der nächste passende Ladepunkt hat Vorrang.";
+          } else if (energy < 0.5) {
+            title = "Zielladestand erreicht";
+            action = "NICHT LADEN";
+            reason = `Der hinterlegte Ziel-Ladestand von ${p.targetSoc} % ist bereits erreicht.`;
+          } else {
+            title = "Bester Ladepunkt in der Nähe";
+            action = "LADEN";
+            reason = `${choice.charger.maxPowerKw ? Math.round(choice.charger.maxPowerKw) + " kW · " : ""}geschätzt ${Math.round(choice.metrics.chargeMinutes)} Min. Ladezeit.`;
+          }
+        }
+        $("#decision").innerHTML = choice
+          ? `<small>${action}</small><h2>${title}</h2><div class="price">${choice.metrics.price.toFixed(2).replace(".", ",")} €<small>/kWh</small></div><div>${choice.charger.name} · ${choice.charger.distanceKm.toFixed(1).replace(".", ",")} km</div><p>${reason}</p>`
+          : `<small>${action}</small><h2>${title}</h2><p>${reason}</p>`;
+        $("#why").innerHTML = choice
+          ? f.fresh
+            ? `Lademenge <b>${choice.metrics.energy.toFixed(1).replace(".", ",")} kWh bis ${p.targetSoc} %</b><br>Ladestrom ${euro(choice.metrics.charging)} · Umwegenergie ${euro(choice.metrics.drive)} · Zeit ${euro(choice.metrics.time)} · <b>Gesamt ${euro(choice.metrics.total)}</b><br><span class="hint">Preisquelle: ${choice.charger.pricePerKwh ? "Ladepunktangabe" : "dein Ladetarif"}.</span>`
+            : "Ladepunkte sind verfügbar. Die Gesamtrechnung wartet auf die aktuelle Restreichweite."
+          : "";
+        const ranked = chargers()
+          .map((charger) => ({ charger, metrics: evMet(charger) }))
+          .sort((a, b) =>
+            f.fresh
+              ? a.metrics.total - b.metrics.total
+              : a.charger.distanceKm - b.charger.distanceKm,
+          );
+        $("#list").innerHTML = ranked.length
+          ? ranked
+              .map(
+                ({ charger, metrics }) =>
+                  `<div class="station"><b>${charger.name}</b><small>${charger.address || charger.operator}</small><small>${charger.distanceKm.toFixed(1).replace(".", ",")} km · ${charger.maxPowerKw ? Math.round(charger.maxPowerKw) + " kW · " : ""}${charger.connectors?.join(", ") || "Anschluss unbekannt"}</small><small>${metrics.price.toFixed(2).replace(".", ",")} €/kWh (${charger.pricePerKwh ? "Stationsangabe" : "dein Tarif"})${f.fresh ? " · Gesamt " + euro(metrics.total) : ""}</small></div>`,
+              )
+              .join("")
+          : '<div class="state">Keine passenden Ladepunkte im aktuellen Umkreis gefunden.</div>';
+        if (loc && chargerFeed)
+          $("#optionsBasis").innerHTML =
+            `<b>Basis: aktueller Standort</b><br>25-km-Umkreis · ${chargerFeed.provider}. Sortierung berücksichtigt ${energy.toFixed(1).replace(".", ",")} kWh, Ladeleistung, Umweg und Zeit. Fehlende Stationspreise werden mit deinem Tarif von ${Number(p.publicTariff).toFixed(2).replace(".", ",")} €/kWh berechnet.`;
+      }
       function render() {
+        setModeUi();
+        if (electric()) {
+          renderElectric();
+          return;
+        }
         const t = trust(),
           b = best(),
           l = planned(),
@@ -834,13 +1211,45 @@
       async function load() {
         if (!loc) {
           feed = null;
-          suggestFuelingContext();
+          chargerFeed = null;
+          if (electric()) suggestChargingContext();
+          else suggestFuelingContext();
           $("#status").className = "state err";
           $("#status").textContent = "Standortfreigabe erforderlich.";
           $("#optionsBasis").innerHTML =
             "<b>Keine Standortbasis</b><br>Bitte den aktuellen Standort im Browser freigeben.";
           render();
           setRefreshBusy(false);
+          return;
+        }
+        if (electric()) {
+          try {
+            const response = await fetch(
+                "/api/chargers?" +
+                  new URLSearchParams({
+                    lat: loc.lat,
+                    lng: loc.lng,
+                    radius: 25,
+                  }),
+              ),
+              data = await response.json();
+            if (!response.ok) throw new Error(data.error || response.status);
+            chargerFeed = data;
+            feed = null;
+            suggestChargingContext();
+            $("#status").className = "state live";
+            $("#status").textContent =
+              `LADEPUNKTE · ${data.provider} · ${new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}`;
+            render();
+            setRefreshBusy(false);
+          } catch (error) {
+            chargerFeed = null;
+            $("#status").className = "state err";
+            $("#status").textContent =
+              "Ladepunkt-Abfrage fehlgeschlagen: " + error.message;
+            render();
+            setRefreshBusy(false);
+          }
           return;
         }
         try {
@@ -885,10 +1294,9 @@
         map.fitBounds(L.latLngBounds(pts).pad(0.1));
         L.marker([loc.lat, loc.lng]).addTo(layer);
         L.marker([d.destination.lat, d.destination.lng]).addTo(layer);
-        if (o)
-          L.marker([o.station.lat, o.station.lng])
-            .bindPopup(o.station.name)
-            .addTo(layer);
+        const stop = o?.station || o?.charger;
+        if (stop)
+          L.marker([stop.lat, stop.lng]).bindPopup(stop.name).addTo(layer);
       }
       async function calcRoute() {
         const out = $("#routeResult"),
@@ -927,6 +1335,50 @@
             throw new Error(g.error || "Ziel nicht gefunden");
           const d = g.results[0];
           $("#destResolved").value = d.name;
+          if (electric()) {
+            out.textContent = "Route und Ladeoptionen werden berechnet …";
+            r = await fetch(
+              "/api/charge-options?" +
+                new URLSearchParams({
+                  startLat: loc.lat,
+                  startLng: loc.lng,
+                  destLat: d.lat,
+                  destLng: d.lng,
+                  energyKwh: Math.max(planned(), p.batteryCapacityKwh * 0.5),
+                  evCons: p.evCons,
+                  tariffPrice: p.publicTariff,
+                  vehiclePowerKw: p.vehicleDcKw,
+                  targetSoc: p.targetSoc,
+                  connector: p.evConnector,
+                  timeValue: p.timeValue,
+                  maxDetour: $("#maxDetour").value,
+                  usableRangeKm: trust().usable,
+                }),
+            );
+            g = await r.json();
+            if (!r.ok) throw new Error(g.error || r.status);
+            if (g.meta?.destinationReachable) {
+              out.innerHTML = `<b>${d.name}</b><br>${g.route.distanceKm.toFixed(0)} km · ca. ${Math.round(g.route.durationMinutes)} Min.<br><br><b>Kein Ladestopp erforderlich</b><br>Das Ziel liegt innerhalb der konservativ planbaren Reichweite von ${Math.round(g.meta.usableRangeKm)} km. Ladepunkte werden deshalb nur als freiwillige Option gezeigt.`;
+              draw(g.route);
+              return;
+            }
+            if (!g.options?.length) {
+              out.innerHTML = `<b>${d.name}</b><br>${g.route.distanceKm.toFixed(0)} km · ca. ${Math.round(g.route.durationMinutes)} Min.<br><br>Im nächsten sinnvollen Ladekorridor wurde kein passender Ladepunkt gefunden.`;
+              draw(g.route);
+              return;
+            }
+            const option = g.options[0],
+              from = Math.round(g.meta.stopWindowStartKm),
+              to = Math.round(g.meta.stopWindowEndKm),
+              charger = option.charger,
+              priceNote =
+                charger.priceSource === "station"
+                  ? "Stationsangabe"
+                  : "dein Ladetarif";
+            out.innerHTML = `<b>${d.name}</b><br>${g.route.distanceKm.toFixed(0)} km · ca. ${Math.round(g.route.durationMinutes)} Min.<br><br><b>Nächster sinnvoller Ladestopp</b><br>Ladefenster km ${from}–${to} auf Basis von ${Math.round(g.meta.usableRangeKm)} km konservativer Reichweite.<br><br><b>${charger.name}</b><br>${charger.maxPowerKw ? Math.round(charger.maxPowerKw) + " kW · " : ""}${charger.connectors?.join(", ") || "Anschluss unbekannt"}<br>${charger.pricePerKwh.toFixed(2).replace(".", ",")} €/kWh (${priceNote}) · Zusatzweg ${option.detourKm.toFixed(1).replace(".", ",")} km · Ladezeit ca. ${Math.round(option.chargeMinutes)} Min.<br><b>Gesamtkosten ${euro(option.totalTripCost)}</b>`;
+            draw(g.route, option);
+            return;
+          }
           out.textContent = "Route und Tankoptionen werden berechnet …";
           r = await fetch(
             "/api/route-options?" +
@@ -985,7 +1437,10 @@
                 initMap();
                 if (map) map.invalidateSize();
               }, 50);
-            if (b.dataset.view === "profile") suggestFuelingContext();
+            if (b.dataset.view === "profile") {
+              if (electric()) suggestChargingContext();
+              else suggestFuelingContext();
+            }
           }),
       );
       $("#routeBtn").onclick = calcRoute;
@@ -1011,9 +1466,17 @@
         p.vehicleFuel = $("#vehicleFuel").value;
         p.e10Compatible =
           p.vehicleFuel === "petrol" && $("#e10Compatible").value === "yes";
+        p.batteryCapacityKwh = +$("#batteryCapacityKwh").value;
+        p.evCons = +$("#evCons").value;
+        p.targetSoc = +$("#targetSoc").value;
+        p.vehicleDcKw = +$("#vehicleDcKw").value;
+        p.evConnector = $("#evConnector").value;
+        p.publicTariff = parseLocalizedNumber($("#publicTariff").value) || 0.59;
         localStorage.setItem("tankiq_profile", JSON.stringify(p));
         fill();
         render();
+        if (loc) load();
+        else locate(true);
       };
       $("#fuelPrice").oninput = () => {
         $("#fuelPrice").dataset.auto = "false";
@@ -1032,6 +1495,13 @@
       };
       $("#vehicleFuel").onchange = () => {
         $("#e10Compatible").disabled = $("#vehicleFuel").value === "diesel";
+        setModeUi($("#vehicleFuel").value);
+        if ($("#vehicleFuel").value !== prof().vehicleFuel) {
+          $("#rangeInfo").textContent =
+            "Bitte Fahrzeugdaten speichern, um die Berechnung auf diese Antriebsart umzustellen.";
+          $("#history").innerHTML =
+            '<p class="muted">Der passende Verlauf erscheint nach dem Speichern der Antriebsart.</p>';
+        }
       };
       $("#fuelFull").onchange = () => {
         $("#fuelMissing").disabled = $("#fuelFull").value === "yes";
@@ -1073,7 +1543,76 @@
           $("#eventInfo").textContent = e.message;
         }
       };
+      $("#chargePrice").oninput = () => {
+        $("#chargePrice").dataset.auto = "false";
+        $("#chargePriceInfo").textContent =
+          "Manuell eingegebener kWh-Preis – wird für diesen Ladevorgang verwendet.";
+      };
+      $("#useChargePrice").onclick = () => suggestChargingContext(true);
+      $("#saveCharge").onclick = () => {
+        try {
+          const p = prof(),
+            near = [...chargers()].sort(
+              (a, b) => a.distanceKm - b.distanceKm,
+            )[0],
+            event = buildChargingEvent({
+              batteryCapacityKwh: p.batteryCapacityKwh,
+              energyAddedKwh: $("#chargeKwh").value,
+              pricePerKwh: $("#chargePrice").value,
+              socAfter: $("#chargeSocAfter").value,
+              durationMinutes: $("#chargeDuration").value,
+              odometerKm: $("#chargeOdometer").value,
+              station: near
+                ? {
+                    name: near.name,
+                    address: near.address,
+                    operator: near.operator,
+                  }
+                : null,
+              location: loc ? { lat: loc.lat, lng: loc.lng } : null,
+            });
+          const history = chargingHistory();
+          history.unshift(event);
+          localStorage.setItem(
+            "tankiq_charge_events",
+            JSON.stringify(history.slice(0, 50)),
+          );
+          p.evSoc = event.socAfter;
+          p.rangeQuality = "high";
+          localStorage.setItem("tankiq_profile", JSON.stringify(p));
+          $("#chargeEventInfo").className = "result live";
+          $("#chargeEventInfo").textContent =
+            `Gespeichert: ${event.energyAddedKwh.toFixed(1).replace(".", ",")} kWh · danach ${event.socAfter.toFixed(0)} %${event.pricePerKwh ? " · " + event.pricePerKwh.toFixed(2).replace(".", ",") + " €/kWh · " + euro(event.totalCost) : ""}.`;
+          $("#chargeKwh").value = "";
+          $("#chargePrice").value = "";
+          $("#chargePrice").dataset.auto = "false";
+          $("#chargeDuration").value = "";
+          $("#chargeOdometer").value = "";
+          fill();
+          render();
+        } catch (error) {
+          $("#chargeEventInfo").className = "result err";
+          $("#chargeEventInfo").textContent = error.message;
+        }
+      };
       function renderHistory() {
+        if (electric()) {
+          const events = chargingHistory(),
+            measured = fullToFullElectricConsumption(events);
+          $("#history").innerHTML = events.length
+            ? events
+                .slice(0, 5)
+                .map(
+                  (event) =>
+                    `<div class="history"><b>${new Date(event.timestamp).toLocaleDateString("de-DE")} · ${Number(event.energyAddedKwh).toFixed(1).replace(".", ",")} kWh · danach ${Number(event.socAfter).toFixed(0)} %</b><small>${event.pricePerKwh ? Number(event.pricePerKwh).toFixed(2).replace(".", ",") + " €/kWh · " + euro(event.totalCost) : "Preis nicht erfasst"}${event.durationMinutes !== null ? " · " + Math.round(event.durationMinutes) + " Min." : ""}</small><small>${event.station?.name || "Ladepunkt nicht erfasst"}${event.odometerKm ? " · " + Math.round(event.odometerKm).toLocaleString("de-DE") + " km" : ""}</small></div>`,
+                )
+                .join("")
+            : '<p class="muted">Noch kein Ladevorgang gespeichert. Bis dahin gilt der im Profil hinterlegte Ladestand.</p>';
+          if (measured)
+            $("#history").innerHTML +=
+              `<div class="result live"><b>Gemessener Verbrauch: ${measured.kwhPer100Km.toFixed(2).replace(".", ",")} kWh/100 km</b><br>${measured.kwh.toFixed(1).replace(".", ",")} kWh auf ${Math.round(measured.distanceKm)} km (voll zu voll).</div>`;
+          return;
+        }
         const h = fuelingHistory(),
           c = fullToFullConsumption(h);
         $("#history").innerHTML = h.length
@@ -1098,10 +1637,20 @@
         $("#vehicleFuel").value = p.vehicleFuel;
         $("#e10Compatible").value = p.e10Compatible ? "yes" : "no";
         $("#e10Compatible").disabled = p.vehicleFuel === "diesel";
+        $("#batteryCapacityKwh").value = p.batteryCapacityKwh;
+        $("#evCons").value = p.evCons;
+        $("#targetSoc").value = p.targetSoc;
+        $("#vehicleDcKw").value = p.vehicleDcKw;
+        $("#evConnector").value = p.evConnector;
+        $("#publicTariff").value = Number(p.publicTariff)
+          .toFixed(2)
+          .replace(".", ",");
+        setModeUi();
         syncFuelChoices();
         syncRangeInputs(true);
-        $("#rangeInfo").textContent =
-          `Rechnerisch ${Math.round(rawRange())} km · konservativ planbar ${Math.round(trust().usable)} km · ${planned().toFixed(1).replace(".", ",")} l bis voll.`;
+        $("#rangeInfo").textContent = electric()
+          ? `Rechnerisch ${Math.round(rawRange())} km · konservativ planbar ${Math.round(trust().usable)} km · ${planned().toFixed(1).replace(".", ",")} kWh bis ${p.targetSoc} %.`
+          : `Rechnerisch ${Math.round(rawRange())} km · konservativ planbar ${Math.round(trust().usable)} km · ${planned().toFixed(1).replace(".", ",")} l bis voll.`;
         renderHistory();
       }
       function setRefreshBusy(busy) {
@@ -1117,8 +1666,9 @@
           return;
         }
         $("#status").className = "state";
-        $("#status").textContent =
-          "Standort und Livepreise werden aktualisiert …";
+        $("#status").textContent = electric()
+          ? "Standort und Ladepunkte werden aktualisiert …"
+          : "Standort und Livepreise werden aktualisiert …";
         let retried = false;
         const success = (position) => {
             loc = {
@@ -1144,6 +1694,7 @@
           finalFailure = async (error) => {
             loc = null;
             feed = null;
+            chargerFeed = null;
             let permission = "unbekannt";
             try {
               permission = (
@@ -1164,9 +1715,14 @@
             $("#optionsBasis").innerHTML =
               "<b>Keine Standortbasis</b><br>Ohne eine vom Gerät gelieferte Position werden keine Ersatzkoordinaten verwendet.";
             pendingLivePrice = false;
-            $("#fuelPriceInfo").textContent = $("#fuelPrice").value
-              ? "Manueller Preis bleibt verwendbar. Standort konnte nicht ermittelt werden."
-              : "Standort konnte nicht ermittelt werden. Preis bitte manuell vom Beleg eintragen.";
+            if (electric()) {
+              $("#chargePriceInfo").textContent =
+                "Standort konnte nicht ermittelt werden. Dein persönlicher Ladetarif bleibt verwendbar.";
+            } else {
+              $("#fuelPriceInfo").textContent = $("#fuelPrice").value
+                ? "Manueller Preis bleibt verwendbar. Standort konnte nicht ermittelt werden."
+                : "Standort konnte nicht ermittelt werden. Preis bitte manuell vom Beleg eintragen.";
+            }
             render();
             setRefreshBusy(false);
           };
