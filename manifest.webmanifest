@@ -1,0 +1,23 @@
+{
+  "name": "TANKIQ 1.3.0",
+  "short_name": "TANKIQ",
+  "description": "Tankentscheidungen mit Livepreisen und optimalen Tankstopps entlang der Route.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8faf8",
+  "theme_color": "#0e5a4f",
+  "icons": [
+    {
+      "src": "/assets/tankiq-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/tankiq-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

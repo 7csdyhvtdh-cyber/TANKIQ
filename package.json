@@ -1,0 +1,17 @@
+{
+  "name": "tankiq",
+  "version": "1.3.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@vercel/functions": "3.9.3"
+  },
+  "scripts": {
+    "dev": "node scripts/dev-server.mjs",
+    "test": "node --test",
+    "check": "node --check api/stations.js && node --check api/geocode.js && node --check api/route-options.js && node --check api/health.js && node --check api/diagnostics.js"
+  },
+  "engines": {
+    "node": "24.x"
+  }
+}

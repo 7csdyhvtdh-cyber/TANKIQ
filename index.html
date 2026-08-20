@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#0e5a4f" />
+    <title>TANKIQ 1.3.0</title>
+    <link rel="icon" href="/assets/tankiq-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/assets/tankiq-icon-180.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #edf2ef;
+        color: #1d2723;
+        font: 14px system-ui;
+      }
+      .app {
+        max-width: 560px;
+        margin: auto;
+        min-height: 100vh;
+        background: #f8faf8;
+        padding-bottom: 70px;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 9;
+        background: #fff;
+        padding: 14px 16px;
+        border-bottom: 1px solid #dce5e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header > div {
+        display: flex;
+        align-items: center;
+      }
+      header b {
+        font-size: 22px;
+        letter-spacing: 0.05em;
+      }
+      .brand-icon {
+        display: block;
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        margin-right: 9px;
+      }
+      main {
+        padding: 16px;
+      }
+      .view {
+        display: none;
+      }
+      .view.on {
+        display: block;
+      }
+      h1 {
+        font-size: 27px;
+        margin: 4px 0 6px;
+      }
+      .muted {
+        color: #6d7774;
+        line-height: 1.45;
+      }
+      .panel {
+        background: #fff;
+        border: 1px solid #dce5e0;
+        border-radius: 16px;
+        padding: 15px;
+        margin: 12px 0;
+      }
+      .badge {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #0e5a4f;
+        background: #e5f5ee;
+        border-radius: 99px;
+        padding: 5px 8px;
+      }
+      .decision {
+        background: #0e5a4f;
+        color: #fff;
+        border-radius: 20px;
+        padding: 20px;
+        margin: 12px 0;
+      }
+      .decision h2 {
+        font-size: 29px;
+        margin: 5px 0;
+      }
+      .decision .price {
+        font-size: 41px;
+        font-weight: 900;
+      }
+      .seg,
+      .grid {
+        display: grid;
+        gap: 8px;
+      }
+      .seg {
+        grid-template-columns: repeat(3, 1fr);
+        margin: 12px 0;
+      }
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .seg button,
+      .btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 11px;
+        font-weight: 800;
+      }
+      .seg button {
+        background: #fff;
+        border: 1px solid #dce5e0;
+      }
+      .seg button.on,
+      .btn {
+        background: #0e5a4f;
+        color: #fff;
+      }
+      label {
+        font-size: 11px;
+        color: #6d7774;
+        font-weight: 700;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #dce5e0;
+        border-radius: 9px;
+        background: #fff;
+      }
+      .state,
+      .result {
+        padding: 11px;
+        border-radius: 11px;
+        background: #eef3f0;
+        margin: 10px 0;
+      }
+      .live {
+        background: #e5f5ee;
+        color: #075943;
+      }
+      .err {
+        background: #fdebea;
+        color: #8b2f2b;
+      }
+      .station {
+        background: #fff;
+        border: 1px solid #dce5e0;
+        border-radius: 14px;
+        padding: 12px;
+        margin: 8px 0;
+      }
+      .station b,
+      .station small {
+        display: block;
+      }
+      .station small {
+        color: #6d7774;
+        margin-top: 3px;
+      }
+      #map {
+        height: 380px;
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      .summary {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .summary strong {
+        font-size: 22px;
+      }
+      .hint {
+        font-size: 11px;
+        color: #6d7774;
+        margin-top: 7px;
+        line-height: 1.4;
+      }
+      .history {
+        border-top: 1px solid #dce5e0;
+        padding: 9px 0;
+      }
+      .history:first-child {
+        border-top: 0;
+      }
+      .history small {
+        display: block;
+        color: #6d7774;
+        margin-top: 3px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      nav {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(100%, 560px);
+        height: 64px;
+        background: #fff;
+        border-top: 1px solid #dce5e0;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+      }
+      nav button {
+        border: 0;
+        background: none;
+        font-weight: 750;
+        color: #6d7774;
+      }
+      nav button.on {
+        color: #0e5a4f;
+      }
+      @media (max-width: 400px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <div>
+            <img
+              class="brand-icon"
+              src="/assets/tankiq-icon.svg"
+              width="38"
+              height="38"
+              alt=""
+            /><span
+            ><b>TANKIQ</b
+            ><small style="display: block; color: #6d7774; font-size: 10px"
+              >Version 1.3.0</small
+            ></span
+          >
+        </div>
+        <button
+          id="refresh"
+          class="btn"
+          type="button"
+          aria-label="Standort und Preise aktualisieren"
+          title="Standort und Preise aktualisieren"
+        >
+          ↻ Aktualisieren
+        </button>
+      </header>
+      <main>
+        <section id="now" class="view on">
+          <div class="muted">Deine Tankentscheidung</div>
+          <h1>Was solltest du tun?</h1>
+          <div class="seg">
+            <button data-fuel="e5" class="on">E5</button
+            ><button data-fuel="e10" hidden>E10</button
+            ><button data-fuel="diesel" hidden>Diesel</button>
+          </div>
+          <div id="status" class="state">Live-Daten werden geladen …</div>
+          <div id="tankState" class="panel"></div>
+          <div id="rangeCheck" class="panel">
+            <span class="badge">Aktuelle Restreichweite</span>
+            <div class="grid" style="margin-top: 10px">
+              <label
+                >Restreichweite laut Fahrzeug (km)<input
+                  id="currentRangeKm"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="z. B. 420" /></label
+              ><button
+                id="confirmRange"
+                type="button"
+                class="btn"
+                style="margin-top: 16px"
+              >
+                Übernehmen
+              </button>
+            </div>
+            <div id="rangeCheckInfo" class="result"></div>
+          </div>
+          <div class="panel">
+            <span class="badge">Verlässlichkeit</span>
+            <h2 id="trustTitle">Prüfe Datengrundlage</h2>
+            <div id="trustText" class="muted"></div>
+          </div>
+          <div id="decision" class="decision"></div>
+          <div class="panel">
+            <span class="badge">Warum?</span>
+            <div id="why" class="result"></div>
+          </div>
+        </section>
+        <section id="options" class="view">
+          <h1>Optionen in der Nähe</h1>
+          <div id="optionsBasis" class="state">
+            <b>Standort wird ermittelt …</b>
+          </div>
+          <div id="list"></div>
+        </section>
+        <section id="route" class="view">
+          <div class="muted">Null-Umweg-Prinzip</div>
+          <h1>Unterwegs tanken</h1>
+          <p class="muted">
+            TANKIQ berechnet die echte Straßenroute und sucht anhand deiner
+            konservativen Reichweite den nächsten sinnvollen Tankkorridor –
+            statt auf die Abdeckung der gesamten Strecke zu warten.
+          </p>
+          <div class="panel">
+            <label
+              >Ziel in Deutschland<input
+                id="destText"
+                placeholder="z. B. Berlin oder Domstraße 1, Köln"
+            /></label>
+            <div class="grid" style="margin-top: 9px">
+              <label
+                >Max. Umweg km<input
+                  id="maxDetour"
+                  type="number"
+                  value="8"
+                  min="1"
+                  max="30" /></label
+              ><label
+                >Gefundenes Ziel<input
+                  id="destResolved"
+                  readonly
+                  value="Noch nicht gesucht"
+              /></label>
+            </div>
+            <label style="display: block; margin-top: 10px"
+              >Aktuelle Restreichweite laut Fahrzeug (km)<input
+                id="routeRangeKm"
+                type="text"
+                inputmode="numeric"
+                placeholder="vor der Route bestätigen"
+            /></label>
+            <div id="routeRangeInfo" class="hint">
+              Der Wert wird mit „Route prüfen“ als aktuell bestätigt.
+            </div>
+            <button
+              id="routeBtn"
+              class="btn"
+              style="width: 100%; margin-top: 10px"
+            >
+              Route prüfen
+            </button>
+            <div id="routeResult" class="result">
+              Ziel eingeben und berechnen.
+            </div>
+            <p class="muted" style="font-size: 10px">
+              Zielsuche nur nach Klick, keine automatische Vervollständigung.
+              Geokodierung: OpenStreetMap/Nominatim.
+            </p>
+          </div>
+          <div id="map"></div>
+        </section>
+        <section id="profile" class="view">
+          <h1>Mein TANKIQ</h1>
+          <div class="panel">
+            <span class="badge">Fahrzeug & Regeln</span>
+            <div class="grid" style="margin-top: 10px">
+              <label
+                >Verbrauch l/100 km<input
+                  id="cons"
+                  type="number"
+                  value="8"
+                  step=".1"
+                  min=".1" /></label
+              ><label
+                >Tankgröße l<input
+                  id="tankSize"
+                  type="number"
+                  value="67"
+                  min="1" /></label
+              ><label
+                >Fahrzeugkraftstoff<select id="vehicleFuel">
+                  <option value="petrol">Benzin</option>
+                  <option value="diesel">Diesel</option>
+                </select></label
+              ><label
+                >E10 vom Hersteller freigegeben?<select id="e10Compatible">
+                  <option value="no">Nein / unbekannt</option>
+                  <option value="yes">Ja</option>
+                </select></label
+              ><label
+                >Mindestvorteil €<input
+                  id="minSave"
+                  type="number"
+                  value="2"
+                  step=".5"
+                  min="0" /></label
+              ><label
+                >Sicherheitsreserve km<input
+                  id="reserveKm"
+                  type="number"
+                  value="60"
+                  min="0" /></label
+              ><label
+                >Reichweitenqualität<select id="rangeQuality">
+                  <option value="high">Fahrzeuganzeige / voll</option>
+                  <option value="medium">geschätzt</option>
+                  <option value="low">grob geschätzt</option>
+                </select></label
+              ><label
+                >Zeitwert €/h<input
+                  id="timeValue"
+                  type="number"
+                  value="20"
+                  min="0"
+              /></label>
+            </div>
+            <button id="save" class="btn" style="width: 100%; margin-top: 10px">
+              Fahrzeugdaten speichern
+            </button>
+            <div id="rangeInfo" class="result"></div>
+          </div>
+          <div class="panel">
+            <span class="badge">Nach dem Tanken</span>
+            <h2>Tankvorgang erfassen</h2>
+            <p class="muted">
+              Nur nach einem Tankstopp eintragen – nicht täglich. Kaufmenge und
+              Tankinhalt werden getrennt geführt.
+            </p>
+            <div class="grid">
+              <label
+                >Getankt l<input
+                  id="fuelLiters"
+                  type="text"
+                  inputmode="decimal"
+                  value="60"
+                  placeholder="z. B. 60 oder 60,5" /></label
+              ><label
+                >Bezahlter Preis pro Liter<input
+                  id="fuelPrice"
+                  type="text"
+                  inputmode="decimal"
+                  placeholder="z. B. 1,699" /></label
+              ><label
+                >Erkannte Tankstelle<input
+                  id="fuelStation"
+                  readonly
+                  value="Noch nicht erkannt" /></label
+              ><label
+                >Vollgetankt?<select id="fuelFull">
+                  <option value="no">Nein</option>
+                  <option value="yes">Ja</option>
+                </select></label
+              ><label
+                >Fehlen bis voll l<input
+                  id="fuelMissing"
+                  type="text"
+                  inputmode="decimal"
+                  value="7"
+                  placeholder="z. B. 7" /></label
+              ><label
+                >Kilometerstand (optional)<input
+                  id="fuelOdometer"
+                  type="number"
+                  min="0"
+                  placeholder="für Verbrauch"
+              /></label>
+            </div>
+            <div id="fuelPriceInfo" class="hint">
+              Preis manuell vom Beleg eintragen oder den erkannten Livepreis
+              übernehmen.
+            </div>
+            <button
+              id="useLivePrice"
+              type="button"
+              class="btn"
+              style="width: 100%; margin-top: 10px"
+              disabled
+            >
+              Livepreis übernehmen</button
+            ><button
+              id="saveFuel"
+              class="btn"
+              style="width: 100%; margin-top: 10px"
+            >
+              Tankvorgang speichern
+            </button>
+            <div id="eventInfo" class="result">
+              Beispiel heute: 60 l getankt, nicht voll, 7 l fehlen.
+            </div>
+          </div>
+          <div class="panel">
+            <span class="badge">Verlauf</span>
+            <h2>Letzte Tankvorgänge</h2>
+            <div id="history"></div>
+          </div>
+          <div class="panel">
+            <b>Prinzip</b>
+            <p class="muted">
+              TANKIQ meldet Handlungsbedarf nur, wenn Datenqualität, Reichweite
+              und wirtschaftlicher Vorteil dafür ausreichen. Ein Teilvorgang
+              liefert noch keinen belastbaren Verbrauch; dafür wartet TANKIQ auf
+              zwei Volltankungen.
+            </p>
+          </div>
+        </section>
+      </main>
+      <nav>
+        <button data-view="now" class="on">Jetzt</button
+        ><button data-view="options">Optionen</button
+        ><button data-view="route">Unterwegs</button
+        ><button data-view="profile">Mein TANKIQ</button>
+      </nav>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module">
+      import {
+        allowedFuelTypes,
+        applyRangeConfirmation,
+        buildFuelingEvent,
+        deriveTankState,
+        fullToFullConsumption,
+        nearestPricedStation,
+        parseLocalizedNumber,
+        plannedRefillLiters,
+        rangeEstimate,
+        rangeFreshness,
+      } from "/lib/tank-model.js";
+      const $ = (s) => document.querySelector(s),
+        $$ = (s) => [...document.querySelectorAll(s)],
+        euro = (n) => (+n || 0).toFixed(2).replace(".", ",") + " €",
+        fmt = (n) =>
+          typeof n === "number" ? n.toFixed(3).replace(".", ",") + " €" : "–",
+        round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
+      let fuel = "e5",
+        feed = null,
+        loc = null,
+        map,
+        layer,
+        pendingLivePrice = false;
+      function prof() {
+        return Object.assign(
+          {
+            cons: 8,
+            tankSize: 67,
+            tankPct: 35,
+            liters: 60,
+            minSave: 2,
+            reserveKm: 60,
+            rangeQuality: "medium",
+            timeValue: 20,
+            vehicleFuel: "petrol",
+            e10Compatible: false,
+          },
+          JSON.parse(localStorage.getItem("tankiq_profile") || "{}"),
+        );
+      }
+      function syncFuelChoices() {
+        const allowed = allowedFuelTypes(prof());
+        if (!allowed.includes(fuel)) fuel = allowed[0];
+        $$("[data-fuel]").forEach((b) => {
+          b.hidden = !allowed.includes(b.dataset.fuel);
+          b.classList.toggle("on", b.dataset.fuel === fuel);
+        });
+        $(".seg").style.gridTemplateColumns = `repeat(${allowed.length},1fr)`;
+      }
+      function fuelingHistory() {
+        try {
+          const h = JSON.parse(localStorage.getItem("tankiq_events") || "[]");
+          return Array.isArray(h) ? h : [];
+        } catch {
+          return [];
+        }
+      }
+      function storedRangeConfirmation() {
+        try {
+          return JSON.parse(
+            localStorage.getItem("tankiq_range_confirmation") || "null",
+          );
+        } catch {
+          return null;
+        }
+      }
+      function tank() {
+        return applyRangeConfirmation(
+          prof(),
+          deriveTankState(prof(), fuelingHistory()),
+          storedRangeConfirmation(),
+        );
+      }
+      function freshness() {
+        return rangeFreshness(tank(), loc, {
+          maxAgeHours: 24,
+          moveThresholdKm: 5,
+        });
+      }
+      function saveRangeConfirmation(value) {
+        const rangeKm = parseLocalizedNumber(value);
+        if (rangeKm === null || rangeKm < 0 || rangeKm > 2000)
+          throw new Error(
+            "Bitte die Restreichweite als Kilometerwert eingeben, z. B. 420.",
+          );
+        localStorage.setItem(
+          "tankiq_range_confirmation",
+          JSON.stringify({
+            rangeKm,
+            timestamp: new Date().toISOString(),
+            location: loc ? { lat: loc.lat, lng: loc.lng } : null,
+          }),
+        );
+        $("#currentRangeKm").dataset.dirty = "false";
+        $("#routeRangeKm").dataset.dirty = "false";
+        syncRangeInputs(true);
+        render();
+      }
+      function syncRangeInputs(force = false) {
+        const value = String(Math.round(rawRange()));
+        ["currentRangeKm", "routeRangeKm"].forEach((id) => {
+          const input = $("#" + id);
+          if (force || input.dataset.dirty !== "true") input.value = value;
+        });
+      }
+      function planned() {
+        return plannedRefillLiters(prof(), tank());
+      }
+      function stations() {
+        return feed
+          ? feed.stations.filter(
+              (s) => s.isOpen && typeof s.prices?.[fuel] === "number",
+            )
+          : [];
+      }
+      function suggestFuelingContext(force = false) {
+        const station = nearestPricedStation(feed?.stations || [], fuel),
+          price = $("#fuelPrice"),
+          stationField = $("#fuelStation"),
+          info = $("#fuelPriceInfo"),
+          button = $("#useLivePrice");
+        if (!station) {
+          button.disabled = false;
+          button.textContent = "Standort & Livepreis laden";
+          stationField.value = "Noch nicht erkannt";
+          info.textContent = price.value
+            ? "Manuell eingegebener Preis. Livepreis kann zusätzlich per Standort geladen werden."
+            : "Preis manuell vom Beleg eintragen oder Standort und Livepreis laden.";
+          return;
+        }
+        const livePrice = Number(station.prices[fuel]);
+        button.disabled = false;
+        button.textContent = "Livepreis übernehmen";
+        stationField.value = `${station.name} · ${station.distanceKm.toFixed(1).replace(".", ",")} km`;
+        if (force || !price.value || price.dataset.auto === "true") {
+          price.value = livePrice.toFixed(3).replace(".", ",");
+          price.dataset.auto = "true";
+          info.textContent = `${fuel.toUpperCase()}-Livepreis ${livePrice.toFixed(3).replace(".", ",")} €/l von ${station.name} übernommen. Bitte mit Zapfsäule oder Beleg prüfen.`;
+        } else
+          info.textContent = `Manueller Preis bleibt erhalten. Verfügbarer Livepreis: ${livePrice.toFixed(3).replace(".", ",")} €/l von ${station.name}.`;
+      }
+      function rawRange() {
+        return rangeEstimate(prof(), tank()).raw;
+      }
+      function trust() {
+        return rangeEstimate(prof(), tank());
+      }
+      function met(s) {
+        const p = prof(),
+          near =
+            [...stations()].sort((a, b) => a.distanceKm - b.distanceKm)[0] || s,
+          l = planned(),
+          extra = Math.max(0, (s.distanceKm - near.distanceKm) * 2),
+          drive = round2(((extra * p.cons) / 100) * s.prices[fuel]),
+          time = round2((extra / 60) * p.timeValue),
+          saving = round2((near.prices[fuel] - s.prices[fuel]) * l),
+          net = round2(saving - drive - time);
+        return {
+          near,
+          liters: l,
+          drive,
+          time,
+          saving,
+          net,
+          total: round2(s.prices[fuel] * l + drive + time),
+        };
+      }
+      function best() {
+        return stations()
+          .map((s) => ({ s, m: met(s) }))
+          .sort((a, b) => a.m.total - b.m.total)[0];
+      }
+      function renderTank() {
+        const p = prof(),
+          s = tank(),
+          l = planned(),
+          pct = Math.round((s.liters / p.tankSize) * 100),
+          when = s.asOf
+            ? new Date(s.asOf).toLocaleString("de-DE", {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })
+            : "bisherige Eingabe",
+          note =
+            s.source === "dashboard-range"
+              ? `Aus der Restreichweite des Fahrzeugs bestätigt am ${when}.`
+              : s.source === "fueling-event"
+                ? `Stand direkt nach dem Tankvorgang am ${when}.`
+                : "Aus der bisherigen 60-Liter-/Profilangabe übernommen.";
+        $("#tankState").innerHTML =
+          `<span class="badge">Tankstand & Planmenge</span><div class="summary" style="margin-top:9px"><div><strong>${s.liters.toFixed(1).replace(".", ",")} l</strong><div class="muted">geschätzt im Tank (${pct} %)</div></div><div style="text-align:right"><strong>${l.toFixed(1).replace(".", ",")} l</strong><div class="muted">bis voll geplant</div></div></div><div class="hint">${note}</div>`;
+      }
+      function renderRangeCard() {
+        const s = tank(),
+          f = freshness(),
+          when = s.asOf
+            ? new Date(s.asOf).toLocaleString("de-DE", {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })
+            : "noch nie",
+          source =
+            s.source === "dashboard-range"
+              ? "Bordcomputer"
+              : s.source === "fueling-event"
+                ? "Tankvorgang"
+                : "bisheriges Profil";
+        syncRangeInputs();
+        $("#rangeCheckInfo").className = f.fresh ? "result live" : "result err";
+        $("#rangeCheckInfo").textContent = f.fresh
+          ? `Aktuell bestätigt über ${source} · ${when}. Für starke Empfehlungen verwendbar.`
+          : f.reason === "moved"
+            ? `Seit der letzten Bestätigung hat sich der Standort um mindestens ${Math.round(f.movedKm)} km verändert. Bitte den Bordcomputerwert aktualisieren.`
+            : f.reason === "age"
+              ? `Letzte Bestätigung: ${when}. Bitte vor einer Tankentscheidung kurz den Bordcomputerwert übernehmen.`
+              : "Noch keine aktuelle Restreichweite bestätigt.";
+        $("#routeRangeInfo").textContent = f.fresh
+          ? `Vorbelegt mit ${Math.round((s.liters / prof().cons) * 100)} km; „Route prüfen“ bestätigt den angezeigten Wert erneut.`
+          : "Bitte vor der Route den aktuellen Bordcomputerwert eingeben.";
+      }
+      function render() {
+        const t = trust(),
+          b = best(),
+          l = planned(),
+          f = freshness();
+        renderTank();
+        renderRangeCard();
+        $("#trustTitle").textContent = !f.fresh
+          ? "Restreichweite nicht aktuell"
+          : t.level === "low"
+            ? "Reichweite bitte bestätigen"
+            : t.level === "high"
+              ? "Gute Datengrundlage"
+              : "Ausreichende Datengrundlage";
+        $("#trustText").textContent = f.fresh
+          ? `Rechnerisch ${Math.round(t.raw)} km, konservativ planbar ${Math.round(t.usable)} km. Basis: ${tank().liters.toFixed(1).replace(".", ",")} l Tankinhalt.`
+          : "Livepreise bleiben verfügbar. Reichweite, Tankmenge und Wirtschaftlichkeit werden erst nach kurzer Bestätigung verbindlich bewertet.";
+        let h = "Keine verlässliche Empfehlung",
+          a = "DATEN FEHLEN",
+          r = "Es fehlen gültige Livepreise.";
+        if (b) {
+          if (!f.fresh) {
+            h = "Restreichweite aktualisieren";
+            a = "KURZ BESTÄTIGEN";
+            r =
+              "Bitte den aktuellen Kilometerwert vom Bordcomputer übernehmen. Danach folgt sofort die Tankempfehlung.";
+          } else if (t.usable < 40) {
+            h = "Jetzt tanken";
+            a = "SICHERHEIT";
+            r =
+              "Die konservative Reichweite ist zu gering. Sicherheit hat Vorrang.";
+          } else if (l < 1) {
+            h = "Kein Nachtanken nötig";
+            a = "TANK PRAKTISCH VOLL";
+            r = "Die erfasste Nachfüllmenge liegt unter einem Liter.";
+          } else if (t.level === "low" && t.usable < 120) {
+            h = "Reichweite kurz prüfen";
+            a = "PRÜFEN";
+            r = "Die Reichweite ist für eine starke Empfehlung zu unsicher.";
+          } else if (b.m.net >= prof().minSave) {
+            h = "Jetzt tanken lohnt sich";
+            a = "JETZT";
+            r = `Nach Fahrt- und Zeitkosten bleiben rund ${euro(b.m.net)} Vorteil.`;
+          } else {
+            h = "Heute nichts tun";
+            a = "KEIN HANDLUNGSBEDARF";
+            r = `Für die geplanten ${l.toFixed(1).replace(".", ",")} l bleibt aktuell kein relevanter wirtschaftlicher Vorteil.`;
+          }
+        }
+        $("#decision").innerHTML = b
+          ? `<small>${a}</small><h2>${h}</h2><div class="price">${fmt(b.s.prices[fuel])}<small>/l</small></div><div>${b.s.name} · ${b.s.distanceKm.toFixed(1).replace(".", ",")} km</div><p>${r}</p>`
+          : `<small>${a}</small><h2>${h}</h2><p>${r}</p>`;
+        $("#why").innerHTML = b
+          ? f.fresh
+            ? `Berechnungsmenge <b>${b.m.liters.toFixed(1).replace(".", ",")} l bis voll</b><br>Preisvorteil ${euro(b.m.saving)} · Fahrt −${euro(b.m.drive)} · Zeit −${euro(b.m.time)} · <b>Netto ${euro(b.m.net)}</b>`
+            : "Livepreise sind verfügbar. Die Wirtschaftlichkeitsrechnung wartet auf die aktuelle Restreichweite."
+          : "";
+        const ranked = stations()
+          .map((s) => ({ s, m: met(s) }))
+          .sort((a, b) =>
+            f.fresh
+              ? a.m.total - b.m.total
+              : a.s.prices[fuel] - b.s.prices[fuel],
+          );
+        $("#list").innerHTML = ranked
+          .map(
+            (x) =>
+              `<div class="station"><b>${x.s.name}</b><small>${x.s.address}</small><small>${x.s.distanceKm.toFixed(1).replace(".", ",")} km · ${fmt(x.s.prices[fuel])}/l${f.fresh ? " · " + x.m.liters.toFixed(1).replace(".", ",") + " l · Gesamtkosten " + euro(x.m.total) : " · nach Preis sortiert"}</small></div>`,
+          )
+          .join("");
+        if (loc && feed)
+          $("#optionsBasis").innerHTML = f.fresh
+            ? `<b>Basis: aktueller Standort</b><br>25-km-Umkreis um ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}. Sortiert nach Gesamtkosten für ${planned().toFixed(1).replace(".", ",")} l bis voll, Zusatzfahrt und Zeitwert.`
+            : `<b>Basis: aktueller Standort</b><br>25-km-Umkreis. Tankmenge noch nicht bestätigt; deshalb zunächst nach Literpreis sortiert.`;
+      }
+      async function load() {
+        if (!loc) {
+          feed = null;
+          suggestFuelingContext();
+          $("#status").className = "state err";
+          $("#status").textContent = "Standortfreigabe erforderlich.";
+          $("#optionsBasis").innerHTML =
+            "<b>Keine Standortbasis</b><br>Bitte den aktuellen Standort im Browser freigeben.";
+          render();
+          setRefreshBusy(false);
+          return;
+        }
+        try {
+          const r = await fetch(
+              "/api/stations?" +
+                new URLSearchParams({ lat: loc.lat, lng: loc.lng, radius: 25 }),
+            ),
+            d = await r.json();
+          if (!r.ok) throw new Error(d.error || r.status);
+          feed = d;
+          suggestFuelingContext(pendingLivePrice);
+          pendingLivePrice = false;
+          $("#optionsBasis").innerHTML =
+            `<b>Basis: aktueller Standort</b><br>25-km-Umkreis um ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}. Nur geöffnete Stationen mit Livepreis; sortiert nach Gesamtkosten für ${planned().toFixed(1).replace(".", ",")} l bis voll, geschätzte Zusatzfahrt und Zeitwert.`;
+          $("#status").className = "state live";
+          $("#status").textContent =
+            `LIVE · ${d.provider}/${d.source} · ${new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}`;
+          render();
+          setRefreshBusy(false);
+        } catch (e) {
+          feed = null;
+          $("#status").className = "state err";
+          $("#status").textContent =
+            "Live-Abfrage fehlgeschlagen: " + e.message;
+          render();
+          setRefreshBusy(false);
+        }
+      }
+      function initMap() {
+        if (map || !loc) return;
+        map = L.map("map").setView([loc.lat, loc.lng], 7);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(map);
+        layer = L.layerGroup().addTo(map);
+      }
+      function draw(d, o) {
+        initMap();
+        layer.clearLayers();
+        const pts = d.geometry.coordinates.map((c) => [c[1], c[0]]);
+        L.polyline(pts, { weight: 5 }).addTo(layer);
+        map.fitBounds(L.latLngBounds(pts).pad(0.1));
+        L.marker([loc.lat, loc.lng]).addTo(layer);
+        L.marker([d.destination.lat, d.destination.lng]).addTo(layer);
+        if (o)
+          L.marker([o.station.lat, o.station.lng])
+            .bindPopup(o.station.name)
+            .addTo(layer);
+      }
+      async function calcRoute() {
+        const out = $("#routeResult"),
+          q = $("#destText").value.trim(),
+          p = prof(),
+          confirmedRange = parseLocalizedNumber($("#routeRangeKm").value);
+        if (!loc) {
+          out.textContent =
+            "Bitte zuerst den aktuellen Standort im Browser freigeben.";
+          return;
+        }
+        if (q.length < 2) {
+          out.textContent = "Bitte Ziel eingeben.";
+          return;
+        }
+        if (
+          confirmedRange === null ||
+          confirmedRange < 0 ||
+          confirmedRange > 2000
+        ) {
+          out.textContent =
+            "Bitte die aktuelle Restreichweite vom Bordcomputer eingeben.";
+          return;
+        }
+        try {
+          saveRangeConfirmation(confirmedRange);
+        } catch (e) {
+          out.textContent = e.message;
+          return;
+        }
+        out.textContent = "Ziel wird gesucht …";
+        try {
+          let r = await fetch("/api/geocode?q=" + encodeURIComponent(q)),
+            g = await r.json();
+          if (!r.ok || !g.results?.length)
+            throw new Error(g.error || "Ziel nicht gefunden");
+          const d = g.results[0];
+          $("#destResolved").value = d.name;
+          out.textContent = "Route und Tankoptionen werden berechnet …";
+          r = await fetch(
+            "/api/route-options?" +
+              new URLSearchParams({
+                startLat: loc.lat,
+                startLng: loc.lng,
+                destLat: d.lat,
+                destLng: d.lng,
+                fuel,
+                liters: planned(),
+                cons: p.cons,
+                timeValue: p.timeValue,
+                maxDetour: $("#maxDetour").value,
+                usableRangeKm: trust().usable,
+              }),
+          );
+          g = await r.json();
+          if (!r.ok) throw new Error(g.error || r.status);
+          if (!g.meta?.coverageReliable) {
+            out.innerHTML = `<b>${d.name}</b><br>${g.route.distanceKm.toFixed(0)} km · ca. ${Math.round(g.route.durationMinutes)} Min.<br><br><b>Tankkorridor erkannt, Livepreis wartet</b><br>Für das nächste sinnvolle Tankfenster bei km ${Math.round(g.meta?.stopDistanceKm || 0)} ist gerade keine neue Gebietsabfrage verfügbar. Bitte in etwa einer Minute erneut prüfen.`;
+            draw(g.route);
+            return;
+          }
+          if (!g.options?.length) {
+            out.innerHTML = `<b>${d.name}</b><br>${g.route.distanceKm.toFixed(0)} km · ca. ${Math.round(g.route.durationMinutes)} Min.<br>Keine passende Tankoption gefunden.`;
+            draw(g.route);
+            return;
+          }
+          const x = g.options[0],
+            from = Math.round(g.meta.stopWindowStartKm),
+            to = Math.round(g.meta.stopWindowEndKm);
+          out.innerHTML = `<b>${d.name}</b><br>${g.route.distanceKm.toFixed(0)} km · ca. ${Math.round(g.route.durationMinutes)} Min.<br><br><b>Nächster sinnvoller Tankstopp</b><br>Tankfenster km ${from}–${to} auf Basis von ${Math.round(g.meta.usableRangeKm)} km konservativer Reichweite.<br><br><b>${x.station.name}</b><br>${fmt(x.station.price)}/l · Zusatzweg ${x.detourKm.toFixed(1).replace(".", ",")} km · ${Math.round(x.detourMinutes)} Min.<br>${x.detourKm <= 0.8 ? "Nahezu Null-Umweg." : "Beste Option im nächsten erreichbaren Tankfenster."}`;
+          draw(g.route, x);
+        } catch (e) {
+          out.textContent = "Routenberechnung fehlgeschlagen: " + e.message;
+        }
+      }
+      $$("[data-fuel]").forEach(
+        (b) =>
+          (b.onclick = () => {
+            $$("[data-fuel]").forEach((x) => x.classList.remove("on"));
+            b.classList.add("on");
+            fuel = b.dataset.fuel;
+            suggestFuelingContext();
+            render();
+          }),
+      );
+      $$("[data-view]").forEach(
+        (b) =>
+          (b.onclick = () => {
+            $$("[data-view]").forEach((x) => x.classList.toggle("on", x === b));
+            $$(".view").forEach((x) => x.classList.remove("on"));
+            $("#" + b.dataset.view).classList.add("on");
+            if (b.dataset.view === "route")
+              setTimeout(() => {
+                initMap();
+                if (map) map.invalidateSize();
+              }, 50);
+            if (b.dataset.view === "profile") suggestFuelingContext();
+          }),
+      );
+      $("#routeBtn").onclick = calcRoute;
+      $("#confirmRange").onclick = () => {
+        try {
+          saveRangeConfirmation($("#currentRangeKm").value);
+        } catch (e) {
+          $("#rangeCheckInfo").className = "result err";
+          $("#rangeCheckInfo").textContent = e.message;
+        }
+      };
+      ["currentRangeKm", "routeRangeKm"].forEach(
+        (id) =>
+          ($("#" + id).oninput = () => ($("#" + id).dataset.dirty = "true")),
+      );
+      $("#refresh").onclick = () => locate(true);
+      $("#save").onclick = () => {
+        const p = prof();
+        ["cons", "tankSize", "minSave", "reserveKm", "timeValue"].forEach(
+          (k) => (p[k] = +$("#" + k).value),
+        );
+        p.rangeQuality = $("#rangeQuality").value;
+        p.vehicleFuel = $("#vehicleFuel").value;
+        p.e10Compatible =
+          p.vehicleFuel === "petrol" && $("#e10Compatible").value === "yes";
+        localStorage.setItem("tankiq_profile", JSON.stringify(p));
+        fill();
+        render();
+      };
+      $("#fuelPrice").oninput = () => {
+        $("#fuelPrice").dataset.auto = "false";
+        $("#fuelPriceInfo").textContent =
+          "Manuell eingegebener Preis – wird beim Speichern dieses Tankvorgangs verwendet.";
+      };
+      $("#useLivePrice").onclick = () => {
+        if (nearestPricedStation(feed?.stations || [], fuel))
+          suggestFuelingContext(true);
+        else {
+          pendingLivePrice = true;
+          $("#fuelPriceInfo").textContent =
+            "Standort und Livepreise werden geladen …";
+          locate(true);
+        }
+      };
+      $("#vehicleFuel").onchange = () => {
+        $("#e10Compatible").disabled = $("#vehicleFuel").value === "diesel";
+      };
+      $("#fuelFull").onchange = () => {
+        $("#fuelMissing").disabled = $("#fuelFull").value === "yes";
+        if ($("#fuelFull").value === "yes") $("#fuelMissing").value = 0;
+      };
+      $("#saveFuel").onclick = () => {
+        try {
+          const p = prof(),
+            near = nearestPricedStation(feed?.stations || [], fuel),
+            event = buildFuelingEvent({
+              tankSize: p.tankSize,
+              litersPurchased: $("#fuelLiters").value.replace(",", "."),
+              pricePerLiter: $("#fuelPrice").value.replace(",", "."),
+              odometerKm: $("#fuelOdometer").value,
+              fullTank: $("#fuelFull").value === "yes",
+              missingLiters: $("#fuelMissing").value.replace(",", "."),
+              station: near ? { name: near.name, address: near.address } : null,
+              location: loc ? { lat: loc.lat, lng: loc.lng } : null,
+            });
+          const h = fuelingHistory();
+          h.unshift(event);
+          localStorage.setItem("tankiq_events", JSON.stringify(h.slice(0, 50)));
+          p.tankPct = (event.tankAfterLiters / p.tankSize) * 100;
+          p.liters = event.litersPurchased;
+          p.rangeQuality = event.fullTank ? "high" : "medium";
+          localStorage.setItem("tankiq_profile", JSON.stringify(p));
+          $("#eventInfo").className = "result live";
+          $("#eventInfo").textContent =
+            `Gespeichert: ${event.litersPurchased.toFixed(1).replace(".", ",")} l getankt${event.pricePerLiter ? ` · ${fmt(event.pricePerLiter)}/l · ${euro(event.totalCost)}` : ""} · danach ${event.tankAfterLiters.toFixed(1).replace(".", ",")} l im Tank · ${event.missingLiters.toFixed(1).replace(".", ",")} l bis voll.`;
+          $("#fuelLiters").value = "";
+          $("#fuelPrice").value = "";
+          $("#fuelPrice").dataset.auto = "false";
+          $("#fuelStation").value = "Noch nicht erkannt";
+          $("#fuelOdometer").value = "";
+          fill();
+          render();
+        } catch (e) {
+          $("#eventInfo").className = "result err";
+          $("#eventInfo").textContent = e.message;
+        }
+      };
+      function renderHistory() {
+        const h = fuelingHistory(),
+          c = fullToFullConsumption(h);
+        $("#history").innerHTML = h.length
+          ? h
+              .slice(0, 5)
+              .map(
+                (e) =>
+                  `<div class="history"><b>${new Date(e.timestamp).toLocaleDateString("de-DE")} · ${Number(e.litersPurchased).toFixed(1).replace(".", ",")} l${e.fullTank ? " · voll" : " · Teilbetankung"}</b><small>${e.pricePerLiter ? fmt(e.pricePerLiter) + "/l · " + euro(e.totalCost) : "Preis nicht erfasst"}${e.odometerKm ? " · " + Math.round(e.odometerKm).toLocaleString("de-DE") + " km" : ""}</small><small>Danach ${Number(e.tankAfterLiters).toFixed(1).replace(".", ",")} l im Tank${e.missingLiters ? " · " + Number(e.missingLiters).toFixed(1).replace(".", ",") + " l fehlen" : ""}</small></div>`,
+              )
+              .join("")
+          : '<p class="muted">Noch kein Tankvorgang gespeichert. Die bisherige 60-l-Angabe bleibt bis dahin als Übergangswert erhalten.</p>';
+        if (c)
+          $("#history").innerHTML +=
+            `<div class="result live"><b>Gemessener Verbrauch: ${c.litersPer100Km.toFixed(2).replace(".", ",")} l/100 km</b><br>${c.liters.toFixed(1).replace(".", ",")} l auf ${Math.round(c.distanceKm)} km (voll zu voll).</div>`;
+      }
+      function fill() {
+        const p = prof();
+        ["cons", "tankSize", "minSave", "reserveKm", "timeValue"].forEach(
+          (k) => ($("#" + k).value = p[k]),
+        );
+        $("#rangeQuality").value = p.rangeQuality;
+        $("#vehicleFuel").value = p.vehicleFuel;
+        $("#e10Compatible").value = p.e10Compatible ? "yes" : "no";
+        $("#e10Compatible").disabled = p.vehicleFuel === "diesel";
+        syncFuelChoices();
+        syncRangeInputs(true);
+        $("#rangeInfo").textContent =
+          `Rechnerisch ${Math.round(rawRange())} km · konservativ planbar ${Math.round(trust().usable)} km · ${planned().toFixed(1).replace(".", ",")} l bis voll.`;
+        renderHistory();
+      }
+      function setRefreshBusy(busy) {
+        const b = $("#refresh");
+        b.disabled = busy;
+        b.textContent = busy ? "… Aktualisiere" : "↻ Aktualisieren";
+      }
+      function locate(force = false) {
+        setRefreshBusy(true);
+        if (!navigator.geolocation) {
+          loc = null;
+          load();
+          return;
+        }
+        $("#status").className = "state";
+        $("#status").textContent =
+          "Standort und Livepreise werden aktualisiert …";
+        let retried = false;
+        const success = (position) => {
+            loc = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+            load();
+          },
+          failure = (error) => {
+            if (!retried && error.code !== 1) {
+              retried = true;
+              $("#status").textContent =
+                "Frische Position nicht verfügbar – prüfe letzte Browserposition …";
+              navigator.geolocation.getCurrentPosition(success, finalFailure, {
+                enableHighAccuracy: false,
+                timeout: 15000,
+                maximumAge: 300000,
+              });
+              return;
+            }
+            finalFailure(error);
+          },
+          finalFailure = async (error) => {
+            loc = null;
+            feed = null;
+            let permission = "unbekannt";
+            try {
+              permission = (
+                await navigator.permissions.query({ name: "geolocation" })
+              ).state;
+            } catch {}
+            const reason =
+              error.code === 1
+                ? "Zugriff verweigert"
+                : error.code === 2
+                  ? "Position vom Gerät nicht verfügbar"
+                  : error.code === 3
+                    ? "Zeitüberschreitung"
+                    : "unbekannter Ortungsfehler";
+            $("#status").className = "state err";
+            $("#status").textContent =
+              `Standortfehler: ${reason} · Browserberechtigung: ${permission}. ${permission === "granted" ? "Bitte zusätzlich die Ortungsdienste des Geräts aktivieren." : "Bitte die Standortfreigabe für diese Website erlauben."}`;
+            $("#optionsBasis").innerHTML =
+              "<b>Keine Standortbasis</b><br>Ohne eine vom Gerät gelieferte Position werden keine Ersatzkoordinaten verwendet.";
+            pendingLivePrice = false;
+            $("#fuelPriceInfo").textContent = $("#fuelPrice").value
+              ? "Manueller Preis bleibt verwendbar. Standort konnte nicht ermittelt werden."
+              : "Standort konnte nicht ermittelt werden. Preis bitte manuell vom Beleg eintragen.";
+            render();
+            setRefreshBusy(false);
+          };
+        navigator.geolocation.getCurrentPosition(success, failure, {
+          enableHighAccuracy: false,
+          timeout: 20000,
+          maximumAge: force ? 0 : 300000,
+        });
+      }
+      fill();
+      locate();
+    </script>
+  </body>
+</html>

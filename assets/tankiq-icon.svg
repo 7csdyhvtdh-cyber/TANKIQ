@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">TANKIQ</title>
+  <desc id="description">Eine Route führt vom Startpunkt zur optimalen Tankstelle.</desc>
+  <rect width="512" height="512" rx="112" fill="#0e5a4f"/>
+  <path d="M91 391c65 0 52-104 126-104 66 0 55 70 118 70 36 0 57-29 72-65"
+        fill="none" stroke="#fff" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M91 391c65 0 52-104 126-104 66 0 55 70 118 70 36 0 57-29 72-65"
+        fill="none" stroke="#0e5a4f" stroke-width="10" stroke-linecap="round" stroke-dasharray="16 23"/>
+  <circle cx="91" cy="391" r="42" fill="#f2a541" stroke="#fff" stroke-width="15"/>
+  <circle cx="405" cy="280" r="52" fill="#f2a541"/>
+  <g fill="#fff">
+    <path d="M355 102a18 18 0 0 1 18-18h75a18 18 0 0 1 18 18v158a20 20 0 0 1-20 20h-96a20 20 0 0 1-20-20V128a26 26 0 0 1 25-26Zm17 26v62h52v-62Z"/>
+    <path d="M448 118h20c14 0 25 11 25 25v72c0 13-10 23-23 23h-16v-28h10v-58h-16Z"/>
+  </g>
+</svg>
