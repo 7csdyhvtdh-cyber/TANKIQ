@@ -226,6 +226,9 @@
         border: 0;
         background: none;
         font-weight: 750;
+        font-size: 12px;
+        line-height: 1.15;
+        padding: 0 3px;
         color: #6d7774;
       }
       nav button.on {
@@ -267,8 +270,10 @@
       </header>
       <main>
         <section id="now" class="view on">
-          <div class="muted">Deine Tankentscheidung</div>
-          <h1>Was solltest du tun?</h1>
+          <h1>Deine Empfehlung</h1>
+          <p class="muted">
+            TANKIQ zeigt dir, ob sich Tanken jetzt lohnt – und warum.
+          </p>
           <div class="seg">
             <button data-fuel="e5" class="on">E5</button
             ><button data-fuel="e10" hidden>E10</button
@@ -308,7 +313,11 @@
           </div>
         </section>
         <section id="options" class="view">
-          <h1>Optionen in der Nähe</h1>
+          <h1>Tankstellen in der Nähe</h1>
+          <p class="muted">
+            Vergleiche geöffnete Tankstellen mit Livepreisen an deinem aktuellen
+            Standort.
+          </p>
           <div id="optionsBasis" class="state">
             <b>Standort wird ermittelt …</b>
           </div>
@@ -316,11 +325,10 @@
         </section>
         <section id="route" class="view">
           <div class="muted">Null-Umweg-Prinzip</div>
-          <h1>Unterwegs tanken</h1>
+          <h1>Tankstopp auf der Route</h1>
           <p class="muted">
-            TANKIQ berechnet die echte Straßenroute und sucht anhand deiner
-            konservativen Reichweite den nächsten sinnvollen Tankkorridor –
-            statt auf die Abdeckung der gesamten Strecke zu warten.
+            Finde die beste Tankstelle entlang deiner geplanten Strecke – mit
+            möglichst wenig Umweg.
           </p>
           <div class="panel">
             <label
@@ -372,6 +380,9 @@
         </section>
         <section id="profile" class="view">
           <h1>Mein TANKIQ</h1>
+          <p class="muted">
+            Verwalte Fahrzeugdaten, Tankvorgänge und persönliche Einstellungen.
+          </p>
           <div class="panel">
             <span class="badge">Fahrzeug & Regeln</span>
             <div class="grid" style="margin-top: 10px">
@@ -516,9 +527,9 @@
         </section>
       </main>
       <nav>
-        <button data-view="now" class="on">Jetzt</button
-        ><button data-view="options">Optionen</button
-        ><button data-view="route">Unterwegs</button
+        <button data-view="now" class="on">Empfehlung</button
+        ><button data-view="options">Tankstellen</button
+        ><button data-view="route">Routenstopp</button
         ><button data-view="profile">Mein TANKIQ</button>
       </nav>
     </div>
