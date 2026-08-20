@@ -1115,7 +1115,8 @@
             f.fresh
               ? a.metrics.total - b.metrics.total
               : a.charger.distanceKm - b.charger.distanceKm,
-          );
+          )
+          .slice(0, 30);
         $("#list").innerHTML = ranked.length
           ? ranked
               .map(

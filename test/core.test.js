@@ -197,3 +197,14 @@ test("Ladepunktdaten normalisieren Leistung, Anschlüsse und Preis", () => {
   assert.equal(osm.maxPowerKw, 100);
   assert.deepEqual(osm.connectors, ["CCS"]);
 });
+
+test("Nicht öffentliche Ladepunkte werden gekennzeichnet", () => {
+  const charger = normalizeOsmCharger({
+    type: "node",
+    id: 99,
+    lat: 50.9,
+    lon: 7.18,
+    tags: { amenity: "charging_station", access: "private" },
+  });
+  assert.equal(charger.isPublic, false);
+});
